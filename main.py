@@ -3,80 +3,94 @@ pygame.init()
 
 ###setting up window###
 
-x = 0 #initialise x
-y = 0 #initialise y
-
-width = 40 #size of rect
-height = 40 #size of rect
-
-winx = 500
-winy = 300
-win = pygame.display.set_mode((winx,winy))
+win = pygame.display.set_mode((500,480))
 pygame.display.set_caption("Improved Game")
 
-##basic graphics setup###
+###setting up animation and image loading###
 
-bg = pygame.image.load("Images/background.png")
-bg = pygame.transform.scale(bg,(winx,winy))
+walkRight = [pygame.image.load("images/R1.png"), pygame.image.load("images/R2.png"), pygame.image.load("images/R3.png"), pygame.image.load("images/R4.png"),
+             pygame.image.load("images/R5.png"), pygame.image.load("images/R6.png"),
+             pygame.image.load("images/R7.png"), pygame.image.load("images/R8.png"), pygame.image.load("images/R9.png")]
+walkLeft = [pygame.image.load("images/L1.png"), pygame.image.load("images/L2.png"), pygame.image.load("images/L3.png"),
+            pygame.image.load("images/L4.png"), pygame.image.load("images/L5.png"), pygame.image.load("images/L6.png"),
+            pygame.image.load("images/L7.png"), pygame.image.load("images/L8.png"), pygame.image.load("images/L9.png")]
+bg = pygame.image.load("images/bg.jpg")
+char = pygame.image.load("images/standing.png")
 
-ship = pygame.image.load("Images/mario.png")
-ship = pygame.transform.scale(ship,(width,height))
+#various other variable setup#
+x = 50
+y = 400
+width = 40
+height = 60
+vel = 5
 
-###positioning the rect in the middle###
+clock =pygame.time.Clock()
 
-###position the rect in the middle and at the bottom
-x = 250 # position of the rect
-y = 250 # position on y of rect
+isJump = False
+jumpCount = 10
 
-vel = 10 #velocity or attack value
-jumpMax = 10 #set number of iterations for jump maths
+left = False
+right = False
+walkCount = 0
 
-isJump = False #routine for jump
-jumpCount = jumpMax
-
-###Begin of defining functions###
-
-#screen refresh function#
+#define redraw game window function and animate character and work out the walking done by it#
 def redrawGameWindow():
-    win.blit(bg, (0,0))
-    win.blit(ship,(x,y))
+    global walkCount
+
+    win.blit(bg,(0,0))
+    if walkCount + 1 >= 27:
+        walkCount = 0
+    if left:
+        win.blit(walkLeft[walkCount//3], (x,y))
+        walkCount += 1
+    elif right:
+        win.blit(walkRight[walkCount//3],(x,y))
+        walkCount += 1
+    else:
+        win.blit(char,(x,y))
+        walkCount = 0
     pygame.display.update()
 
 run = True
-
+###main loop###
 while run:
-    pygame.time.delay(60) #setting game run speed
+    clock.tick(27)
 
-    for event in pygame.event.get(): #listen for events
-        if event.type == pygame.QUIT: #quit
+    for event in pygame.event.get(): #quit if cross is clicked
+        if event.type == pygame.QUIT:
             run = False
+    keys = pygame.key.get_pressed() #get keypress, IMPORTANT for literally any game
 
-    keys = pygame.key.get_pressed() #variable for keypress
-
-    if keys[pygame.K_LEFT]: #add the   fucking x > vel here later dumbass
+    if keys[pygame.K_LEFT] and x > vel: #if x is
         x -= vel
-        # if pressing left and position of rect is greater than velocity - movement speed in pixels
-    if keys[pygame.K_RIGHT] and x < 500 - vel - width:
+        left = True
+        right = False
+
+    elif keys[pygame.K_RIGHT] and x < 500 - vel - width:
         x += vel
-    if not(isJump):
-        if keys[pygame.K_UP] and y > vel:
-            y -= vel
-
-        if keys[pygame.K_DOWN] and y < 500 - height - vel:
-            y += vel
-
-        if keys[pygame.K_SPACE]:
-            isJump = True
+        left = False
+        right = True
 
     else:
-        if jumpCount >= -jumpMax:
-            y -= (jumpCount * abs(jumpCount))
-            print("jump grav", y) #show the meth
-            jumpCount -= 2
-            print("rect position", (jumpCount - y))
+        left = False
+        right = False
+        walkCount = 0
+
+    if not(isJump):
+        if keys[pygame.K_SPACE]:
+            isJump = True
+            left = False
+            right = False
+            walkCount = 0
+    else:
+        if jumpCount >= -10:
+            y -= (jumpCount * abs(jumpCount)) * 0.5
+            jumpCount -= 1
         else:
-            jumpCount = jumpMax
+            jumpCount = 10
             isJump = False
-    #win.fill((0,0,0))
+
     redrawGameWindow()
+
+
 pygame.quit()
