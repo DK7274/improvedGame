@@ -58,7 +58,6 @@ while run:
         # if pressing left and position of rect is greater than velocity - movement speed in pixels
     if keys[pygame.K_RIGHT] and x < 500 - vel - width:
         x += vel
-
     if not(isJump):
         if keys[pygame.K_UP] and y > vel:
             y -= vel
@@ -73,7 +72,7 @@ while run:
         if jumpCount >= -jumpMax:
             y -= (jumpCount * abs(jumpCount))
             print("jump grav", y) #show the meth
-            jumpCount -= 1
+            jumpCount -= 2
             print("rect position", (jumpCount - y))
         else:
             jumpCount = jumpMax
